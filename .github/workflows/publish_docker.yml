@@ -1,35 +1,24 @@
-name: Publish Docker Container
+# Grant write permissions to the virtual machine for the repository's Packages section
+permissions:
+  contents: read
+  packages: write
 
-# Run only when a push happens directly on the main branch
-on:
-  push:
-    branches: [ main ]
+steps:
+  - name: Checkout repository code
+    uses: actions/checkout@v4
 
-jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
+  # Log in to the GitHub Container Registry (ghcr.io)
+  - name: Authenticate with GitHub Container Registry
+    uses: docker/login-action@v3
+    with:
+      registry: ghcr.io
+      username: ${{ github.actor }}
+      password: ${{ secrets.GITHUB_TOKEN }}
 
-    # Grant write permissions to the virtual machine for the repository's Packages section
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Checkout repository code
-        uses: actions/checkout@v4
-
-      # Log in to the GitHub Container Registry (ghcr.io)
-      - name: Authenticate with GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor | downcase }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # Builds the image using the Dockerfile and pushes it to GitHub
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/mateixx1/workshop_test/test:latest
+  # Builds the image using the Dockerfile and pushes it to GitHub
+  - name: Build and Push Docker Image
+    uses: docker/build-push-action@v5
+    with:
+      context: .
+      push: true
+      tags: ghcr.io/mateixx1/workshop-test/test:latest
